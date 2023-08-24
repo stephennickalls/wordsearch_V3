@@ -154,7 +154,7 @@ except Exception as e:
 root.title("Word Search Generator")
 
 label_instructions = Label(root, text="\n\nEnter the grid size by entering a number such as 20.\n This will create a square grid that is 20x20 letters.\n\n"
-                                      "Enter a comma separated list of up to 20 words.\n The words must be able to fit within the grid. \n A 20x20 grid can only accept words upto 20 characters long ")
+                                      "Enter a comma separated list of up to 20 words.\n The words must be able to fit within the grid. \n A 20x20 grid can only accept words upto 20 characters long")
 label_instructions.pack(padx=10, pady=10)
 
 # Set default for grid size
