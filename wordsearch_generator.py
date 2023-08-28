@@ -12,11 +12,11 @@ class WordSearchGenerator:
 
     def generate(self, words):
         for word in words:
-            # print(word)
             word = word.upper()
+            if random.choice([True, False]):  # randomly reverse the word
+                word = word[::-1]
             if not self.place_word(word):
                 raise Exception('Could not place all words into grid, please try generating again. Also the grid may be too small or some words may be too long')
-                
 
         # fill in empty spaces with random letters
         for i in range(self.height):
@@ -46,7 +46,7 @@ class WordSearchGenerator:
             x += dx
             y += dy
         return True
-
+    
     def do_place_word(self, word, start_x, start_y, dx, dy):
         x, y = start_x, start_y
         path = []  # record path of word
@@ -58,4 +58,5 @@ class WordSearchGenerator:
         self.placements[word] = path  # add path to placements
 
     def find_word(self, word):
-        return self.placements.get(word.upper(), [])
+        return self.placements.get(word.upper(), []) or self.placements.get(word.upper()[::-1], [])
+
