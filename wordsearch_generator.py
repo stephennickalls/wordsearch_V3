@@ -27,7 +27,7 @@ class WordSearchGenerator:
         return self.grid
 
     def place_word(self, word):
-        for _ in range(100):  # attempt to place the word 100 times
+        for _ in range(2000):  # attempt to place the word 100 times
             start_x = random.randint(0, self.width - 1)
             start_y = random.randint(0, self.height - 1)
             dx, dy = random.choice(self.directions)

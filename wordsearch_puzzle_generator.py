@@ -8,12 +8,72 @@ from tkinter import messagebox
 from tkinter import IntVar, StringVar, Checkbutton, OptionMenu
 from PIL import Image, ImageDraw, ImageFont
 from wordsearch_generator import WordSearchGenerator
+from tkinter import filedialog
 
 # Defaults
 DEFAULT_GRID_SIZE = 22
 DEFAULT_OUTPUT_WORDS = True
 DEFAULT_NUM_COLUMNS = 4
 DEFAULT_FONT = "Open Sans"
+
+
+
+def read_from_txt():
+    file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
+    if not file_path:
+        return
+    
+    error_messages = []
+
+    with open(file_path, 'r') as f:
+        content = f.read()
+
+    sections = content.split('\n\n')  # Splitting by two newlines to get each section
+    for section in sections:
+        lines = section.strip().split('\n')
+        theme = lines[0].split(' ', 1)[1].strip()  # Extracting the theme from the first line
+        words = [word.strip() for word in lines[1].split(',')]
+        
+        error_message = generate_wordsearch_from_theme(theme, words)
+        if error_message:
+            error_messages.append(error_message)
+
+    if error_messages:
+        messagebox.showerror("Errors Detected", "\n".join(error_messages))
+    else:
+        messagebox.showinfo("Success", "All word searches generated successfully!")
+
+
+
+
+def generate_wordsearch_from_theme(filename, words):
+    try:
+        size = int(entry_gridsize.get())
+
+        # Check the words input
+        if not check_input(words):
+            return f"Invalid input for theme {filename}: words contain non-alphabet characters."
+
+        if size <= 0 or len(words) > 40 or any(len(word) > size for word in words):
+            return f"Invalid size or word length for theme {filename}."
+
+        wsg = WordSearchGenerator(size, size, words)
+        puzzle = wsg.generate(words)
+
+        print(filename)
+
+        plot_puzzle(puzzle, words, wsg, filename=f'{filename}_puzzle.png')
+        plot_puzzle(puzzle, words, wsg, solution=True, filename=f'{filename}_solution.png')
+
+        if output_words_var.get() == 1:
+            columns = int(entry_columns.get())
+            font_path = fonts[selected_font_var.get()]
+            output_words_to_png(words, f"{filename}_words.png", columns, font_path)
+    except Exception as e:
+        return f"Error generating puzzle for theme {filename}: {str(e)}"
+
+
+
 
 def generate_puzzle(words, wsg):
     grid = wsg.generate(words)
@@ -74,7 +134,7 @@ def generate_wordsearch():
         if not check_input(words):
             return
 
-        if size <= 0 or len(words) > 20 or any(len(word) > size for word in words):
+        if size <= 0 or len(words) > 40 or any(len(word) > size for word in words):
             raise ValueError
 
         wsg = WordSearchGenerator(size, size, words)
@@ -109,7 +169,7 @@ def output_words_to_png(words, filename, columns, font_path):
     img_width = 1300
     column_width = (img_width - (columns - 1) * padding) // columns
     # img_height = 40 * len(words)
-    img_height = 285
+    img_height = 300
 
     x_padding = (img_width-(column_width*4))-15
 
@@ -140,11 +200,12 @@ def output_words_to_png(words, filename, columns, font_path):
     img.save(filename)
 
 
+
 print("\n\nThis window is supposed to open first.")
 print("The Word Search Generator user interface will start shortly\.")
 
 root = Tk()
-root.geometry('500x500')  
+root.geometry('500x600')  
 
 try:
     root.iconbitmap("wordsearch.ico")
@@ -156,6 +217,7 @@ root.title("Word Search Generator")
 label_instructions = Label(root, text="\n\nEnter the grid size by entering a number such as 20.\n This will create a square grid that is 20x20 letters.\n\n"
                                       "Enter a comma separated list of up to 20 words.\n The words must be able to fit within the grid. \n A 20x20 grid can only accept words upto 20 characters long")
 label_instructions.pack(padx=10, pady=10)
+
 
 # Set default for grid size
 label_gridsize = Label(root, text="Grid Size:")
@@ -206,12 +268,7 @@ font_option_menu.pack(padx=10, pady=5)
 generate_button = Button(root, text="Generate wordsearch", command=generate_wordsearch)
 generate_button.pack(padx=10, pady=10)
 
-root.mainloop()
-
-
-
-
-generate_button = Button(root, text="Generate wordsearch", command=generate_wordsearch)
-generate_button.pack(padx=10, pady=10)
+file_button = Button(root, text="Generate wordsearch from .txt", command=read_from_txt)
+file_button.pack(padx=10, pady=10)
 
 root.mainloop()
